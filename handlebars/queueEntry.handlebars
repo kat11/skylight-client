@@ -1,0 +1,14 @@
+<div class="time">
+  <div class="remaining"></div>
+  <div class="total"></div>
+</div>
+
+{{#if item}}
+<img src="{{{extension "item" item ".png"}}}" />
+<div class="market"></div>
+{{type}}<br>{{quantity}} {{itemName item}}
+
+{{else}}
+<img src="{{{extension "craft" craftId ".png"}}}" />
+{{type}}<br>{{islandName endIsland}}
+{{/if}}

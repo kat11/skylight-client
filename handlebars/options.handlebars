@@ -1,0 +1,67 @@
+<div class="hideOptions">
+  <svg viewBox="0 -85 170 170">
+    <path d="M 0,-45 70,-45 70,-85 170,0 70,85 70,45 0,45 Z"/>
+  </svg>
+</div>
+
+<div class="option rptag">
+  <label for="id1">Roleplay Tag</label>
+  <input id="id1" type="text" maxlength="{{MAX_RPTAG}}" value="{{rptag}}" />
+</div>
+
+<div class="option textarea">
+  <label for="id2">Big text box</label>
+  <input id="id2" type="checkbox" {{#if textarea}}checked{{/if}} />
+</div>
+
+<div class="option volume">
+  <label>Volume</label>
+  <input type="range" min="0" max="1" step="0.1" value="{{volume}}" />
+</div>
+
+<div class="option popups">
+  <label for="popups">Pop-ups</label>
+  <input id="popups" type="checkbox" {{#if popups}}checked{{/if}} />
+</div>
+
+<div class="alertHeader">
+  <div class="sound">Sound</div>
+  <div class="popup">Pop-up</div>
+</div>
+
+{{#each alerts}}
+<div class="alert {{type}}">
+  <div class="name">{{name}}</div>
+  <input class="volume" type="range"
+    min="0" max="1" step="0.2" value="{{volume}}" />
+  <select class="sound">
+    {{#each sounds}}
+    <option value="{{sound}}" {{#if active}}selected{{/if}}>
+      {{soundName}}
+    </option>
+    {{/each}}
+  <select>
+  </select>
+  <input class="popups" type="checkbox" {{#if popups}}checked{{/if}} />
+  <select class="duration">
+    {{#each durations}}
+    <option value="{{duration}}" {{#if active}}selected{{/if}}>
+      {{#if duration}}
+      {{duration}}s
+      {{else}}
+      Stay
+      {{/if}}
+    </option>
+    {{/each}}
+  </select>
+</div>
+{{/each}}  
+
+<div class="channels">
+  {{#each channels}}
+  <div>
+    <label>{{name}}</label>
+    <input class="{{name}}" type="checkbox" {{#if active}}checked{{/if}} />
+  </div>
+  {{/each}}  
+</div>
