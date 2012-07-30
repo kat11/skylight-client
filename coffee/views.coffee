@@ -261,7 +261,7 @@ class Views.Textbox extends Backbone.View
   render: ->
     placeholder = game.get 'character'
     if @channels.current?.name is 'Roleplay' && prefs.get 'rptag'
-      placeholder += " [#{prefs.get 'rptag'}]"
+      placeholder += " #{prefs.get 'rptag'}"
     @input.attr {placeholder}
     @textarea.attr {placeholder}
     @$el.toggleClass 'textarea', prefs.get('textarea')
