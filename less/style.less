@@ -730,21 +730,22 @@
   }
 
   .time {
+    color: #666;
     line-height: @timeHeight;
-    border-bottom: 1px solid #666;
+    border-top: 1px solid #666;
   }
 
   svg {
     position: absolute;
-    top: (@timeHeight - @svgSize) / 2;
-    fill: white;
+    bottom: (@timeHeight - @svgSize) / 2;
+    fill: #666;
     height: @svgSize;
     width: @svgSize;
     cursor: pointer;
 
     &.disabled {
-      fill: #666;
       cursor: default;
+      fill: black;
     }
   }
 

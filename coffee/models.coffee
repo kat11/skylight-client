@@ -192,7 +192,7 @@ class Collections.Queue extends Backbone.Collection
 
 class Models.NewsItem extends Backbone.Model
   initialize: ->
-    @set time: new Date
+    @set time: Date.now()
 
 class Collections.News extends Backbone.Collection
   model: Models.NewsItem

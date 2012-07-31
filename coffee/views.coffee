@@ -578,7 +578,8 @@ class Views.News extends Backbone.View
   setPos: (pos) ->
     return unless 0 <= pos <= @length - 1
     @pos = pos
-    @items.css left: - @pos * @itemWidth
+    @update()
+    @items.css left: - pos * @itemWidth
 
     # jquery's toggleClass doesn't work on svg elements
     disable = (selector, condition) =>
@@ -590,21 +591,41 @@ class Views.News extends Backbone.View
         klass.replace /\s?disabled/g, ''
       $el.attr class: klass
 
-    disable '.forward', @pos is @length - 1
-    disable '.forwardForward', @pos is @length - 1
-    disable '.back', @pos is 0
-    disable '.backBack', @pos is 0
+    disable '.forward', pos is @length - 1
+    disable '.forwardForward', pos is @length - 1
+    disable '.back', pos is 0
+    disable '.backBack', pos is 0
 
   add: (model) ->
-    @items.append (new Views.NewsItem {model}).render().el
+    model.view = new Views.NewsItem {model}
+    @items.append model.view.render().el
     @length++
     @setPos(@length - 1) unless @pos? && @pos < @length - 2
+
+  update: ->
+    @collection.at(@pos).view.update()
+    clearTimeout @updateTimeout
+    @updateTimeout = setTimeout (=> @update()), 60000
 
 class Views.NewsItem extends Backbone.View
   className: 'item'
 
   render: ->
     context = _.extend game.toJSON(), @model.toJSON()
-    context.time = Views.timestamp context.time
     @$el.html Templates["news/#{context.type}"] context
     @
+
+  update: ->
+    ago = Date.now() - @model.get('time')
+    minutes = Math.round ago / 60000
+    str = if minutes > 0
+      plural = (num) -> if num is 1 then '' else 's'
+      hours = Math.floor minutes / 60
+      time = if hours
+        "#{hours} hour#{plural hours}"
+      else
+        "#{minutes} minute#{plural minutes}"
+      time + ' ago'
+    else
+      'news just in'
+    @$('.time').html str
