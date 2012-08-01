@@ -68,7 +68,7 @@ file manifest => [__FILE__, 'json'] do
     description: "A less flashy Skyrates.",
     version: VERSION,
     update_url: "http://skyrates.jusque.net/skylight/chromeupdate.xml",
-    minimum_chrome_version: "20",
+    minimum_chrome_version: "21",
     icons: {
       "48"  => "Icon-48.png",
       "128" => "Icon-128.png"
