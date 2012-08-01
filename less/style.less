@@ -73,8 +73,8 @@
   right: 0;
   width: @rightColumn;
   height: 100%;
-  display: -webkit-flexbox;
-  -webkit-flex-flow: column;
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
   overflow: hidden;
 
   .showOptions {
@@ -313,8 +313,8 @@
   }
 
   .option {
-    display: -webkit-flexbox;
-    -webkit-flex-align: center;
+    display: -webkit-flex;
+    -webkit-align-items: center;
 
     &.volume {
       margin: @line-height 0 0 0;
@@ -336,8 +336,8 @@
     font-family: HeavyCrime;
     margin: @line-height 0 0 0;
     text-shadow: 2px 2px 2px rgba(0,0,0,0.4);
-    display: -webkit-flexbox;
-    -webkit-flex-align: center;
+    display: -webkit-flex;
+    -webkit-align-items: center;
 
     .sound {
       width: 300px;
@@ -351,8 +351,8 @@
   }
 
   .alert {
-    display: -webkit-flexbox;
-    -webkit-flex-align: center;
+    display: -webkit-flex;
+    -webkit-align-content: center;
 
     .name {
       width: 165px;
@@ -372,8 +372,8 @@
 
   .channels {
     div {
-      display: -webkit-flexbox;
-      -webkit-flex-align: center;
+      display: -webkit-flex;
+      -webkit-align-items: center;
       float: left;
       margin: 0 0 0 20px;
     }
@@ -549,9 +549,9 @@
   }
 
   .location {
-    display: -webkit-flexbox;
-    -webkit-flex-align: center;
-    -webkit-flex-pack: center;
+    display: -webkit-flex;
+    -webkit-justify-content: center;
+    -webkit-align-items: center;
   }
 
   .sky.flying.flyLeft .location {
@@ -706,7 +706,7 @@
   .items {
     position: absolute;
     height: 100%;
-    display: -webkit-flexbox;
+    display: -webkit-flex;
 
     -webkit-transition-property: left;
     -webkit-transition-duration: 0.2s;
@@ -721,10 +721,10 @@
 
   .content {
     height: @newsHeight - @timeHeight - 1px;
-    display: -webkit-flexbox;
-    -webkit-flex-align: center;
-    -webkit-flex-pack: center;
-    -webkit-flex-flow: column;
+    display: -webkit-flex;
+    -webkit-justify-content: center;
+    -webkit-align-items: center;
+    -webkit-flex-direction: column;
 
     img { display: block; }
   }
