@@ -296,7 +296,7 @@ class Views.Textbox extends Backbone.View
         else if (match = str.match(/^(\/\S+)(.+)/))
           "#{match[1]} #{rptag}#{match[2]}"
         else
-          "[#{rptag}] #{str}"
+          "#{rptag} #{str}"
       socket.send 'chat', channel.id, str
 
     false # stop keypress event bubbling
