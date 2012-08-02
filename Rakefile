@@ -81,9 +81,10 @@ file manifest => [__FILE__, 'json'] do
       matches:      ["http://skyrates.net/play.php"],
       css:          ["style.css"],
       js:           ["jquery.js", "underscore.js", "backbone.js",
-                     "handlebars.runtime.js", "templates.js", "version.js",
-                     "constants.js", "prefs.js", "socket.js", "alerter.js",
-                     "models.js", "helpers.js", "views.js", "setup.js"],
+                     "mousetrap.js", "handlebars.runtime.js", "templates.js",
+                     "version.js", "constants.js", "prefs.js", "socket.js",
+                     "alerter.js", "models.js", "helpers.js", "views.js",
+                     "setup.js"],
       run_at:       "document_start",
       homepage_url: "http://skyrates.net/forum/viewforum.php?f=46"
     }],

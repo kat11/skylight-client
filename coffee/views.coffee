@@ -72,6 +72,7 @@ class Views.Channels extends Backbone.View
 
   initialize: ->
     index = 0
+    channels = []
     for name of CHANNELS
       if (collection = game.channels[name])
         do =>
@@ -79,6 +80,17 @@ class Views.Channels extends Backbone.View
           channel.index = index++
           channel.on 'selected', => @show channel
           channel.select() unless @current
+          channels.push channel
+
+    Mousetrap.bind 'alt+shift+left', =>
+      index = @current.index - 1
+      channels[index].select() if index >= 0
+      false
+
+    Mousetrap.bind 'alt+shift+right', =>
+      index = @current.index + 1
+      channels[index].select() if index < channels.length
+      false
 
     socket.on 'message:online', (online) => @feedback "#{online} online"
 
@@ -217,8 +229,12 @@ class Views.ChannelTab extends Backbone.View
     click: -> @trigger 'select'
 
   initialize: ->
-    $("#skylight .tabs").append @el
     @render()
+    $("#skylight .tabs").append @el
+    letter = @options.name[0].toLowerCase()
+    Mousetrap.bind "alt+shift+#{letter}", =>
+      @trigger 'select'
+      false
 
   render: ->
     @$el.html @options.name
