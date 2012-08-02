@@ -264,6 +264,7 @@ class Views.Textbox extends Backbone.View
     @textarea  = @$ 'textarea'
     @channels  = @options.channels
     @render()
+    @focus()
 
     prefs.on 'change:rptag', @render, @
     prefs.on 'change:textarea', (prefs, textarea) =>
@@ -282,6 +283,12 @@ class Views.Textbox extends Backbone.View
     @textarea.attr {placeholder}
     @$el.toggleClass 'textarea', prefs.get('textarea')
     @
+
+  focus: ->
+    if prefs.get 'textarea'
+      @textarea.focus()
+    else
+      @input.focus()
 
   inputKeypress: (event) ->
     @keypress event.keyCode, @input
