@@ -1,6 +1,6 @@
 require 'rake/clean'
 
-VERSION = '2012.8.2.0'
+VERSION = '2012.8.3.0'
 
 extension = 'Skylight'
 directory extension
