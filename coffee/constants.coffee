@@ -1,5 +1,7 @@
-# remember that chrome extension content scripts run in a sandbox
+# Chrome extension content scripts run in a separate scope to the other scripts
+# in the page.
 
+# namespaces
 Views = {}
 Models = {}
 Collections = {}
@@ -13,16 +15,21 @@ CHANNELS =
   Help:     10
   Roleplay: 3
 
-MAX_RPTAG   = 16
+MAX_RPTAG   = 16 # max character length of rptag pref
+
+# max character length of the chat textbox fields. Skylight server truncates
+# at 1000, but leave room for rptag and character escaping substitutions.
 MAX_TEXTBOX = 940
 
+# mp3Filename: displayName
 SOUNDS =
   alarm: 'Alarm'
   typewriter: 'Typewriter'
   airraid: 'Air Raid'
 
-POPUP_DURATIONS = [4, 6, 8, 10]
+POPUP_DURATIONS = [4, 6, 8, 10] # in seconds
 
+# island ids as used by skyrates
 ISLAND_NAMES =
   1:  "Volstoy"
   2:  "Romeo"
@@ -114,6 +121,8 @@ ISLAND_NAMES =
   88: "Fuel LX"
   89: "Fuel LXI"
 
+# islandId: imgId
+# skyrates reuses a limited set of images for alphas and fuelies
 ISLAND_IMGS =
   1:  1
   2:  2
@@ -205,6 +214,7 @@ ISLAND_IMGS =
   88: 43
   89: 44
 
+# item ids as used by skyrates
 ITEMS =
   1:  'Wood'
   2:  'Food'

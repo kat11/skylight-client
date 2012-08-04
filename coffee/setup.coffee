@@ -1,3 +1,5 @@
+# Start doing stuff.
+
 # global vars
 prefs   = new Prefs # persistent preferences
 socket  = null      # Socket instance to talk with skylight server
@@ -15,8 +17,10 @@ if prefs.get('active')
   game    = new Models.Game
   alerter = new Alerter
 
-# document ready
+# jQuery document ready
 $ ->
+  # Instantiate the top-level views if there is a #client element present.
+  # #client is not present if not logged in.
   if $('#client').length
     new Views.Switcher
     new Views.Skylight if prefs.get('active')

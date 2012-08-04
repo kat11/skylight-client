@@ -1,9 +1,27 @@
+# Socket communication with Skylight server.
+#
+# Socket class wraps a WebSocket connection in order to serialise / deserialise
+# messages, and to allow the use of Backbone.Events to bind callbacks to
+# specific message types.
+#
+# Triggered events:
+#   'open' when the WebSocket opens
+#   'closed' when the WebSocket closes
+#   'broken' when the WebSocket closes and Socket#close has not been called
+#   'message:message_type' when any of the various Skylight messages is
+#     received. The message arguments are passed to bound callbacks.
+#
+# The various skylight messages aren't documented anywhere. Maybe one day.
+
 class Socket
   _.extend @prototype, Backbone.Events
 
   host: 'skyrates.jusque.net'
   port: 8086
-  pingRate: 3 * 60 * 1000
+
+  # Send a 'ping' message this often. Close socket if we go twice this long
+  # without receiving a pong.
+  pingRate: 3 * 60 * 1000 # in milliseconds
 
   constructor: ->
     @url = "ws://#{@host}:#{@port}"
@@ -48,6 +66,7 @@ class Socket
     @ws.send JSON.stringify data
     true
 
+  # periodically send pings, close unless we're being ponged
   pinger: ->
     if Date.now() - @pong > 2 * @pingRate
       @ws.close() unless @closed || @closing
