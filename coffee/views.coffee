@@ -82,12 +82,12 @@ class Views.Channels extends Backbone.View
           channel.select() unless @current
           channels.push channel
 
-    Mousetrap.bind 'alt+shift+left', =>
+    Mousetrap.bind 'alt+ctrl+left', =>
       index = @current.index - 1
       channels[index].select() if index >= 0
       false
 
-    Mousetrap.bind 'alt+shift+right', =>
+    Mousetrap.bind 'alt+ctrl+right', =>
       index = @current.index + 1
       channels[index].select() if index < channels.length
       false
@@ -232,7 +232,7 @@ class Views.ChannelTab extends Backbone.View
     @render()
     $("#skylight .tabs").append @el
     letter = @options.name[0].toLowerCase()
-    Mousetrap.bind "alt+shift+#{letter}", =>
+    Mousetrap.bind "alt+ctrl+#{letter}", =>
       @trigger 'select'
       false
 
