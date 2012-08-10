@@ -44,12 +44,18 @@ class Alerter
     chrome.extension.sendMessage {type: 'popupRequest'}, (id) =>
       if prefs.get('popups') && prefs.get("#{data.type}Popups")
         duration = prefs.get("#{data.type}PopupDuration")
-        if duration && Date.now() - data.time > 60000
-          duration = 1
-        data.duration = duration * 1000
-        data.content = data.content()
+        if duration
+          since = Date.now() - data.time
+          if since > 1000 * 60 * 30
+            data = null
+          else if since > 1000 * 60
+            duration = 1
+        if data
+          data.duration = duration * 1000
+          data.content = data.content()
       else
         data = null
+
       chrome.extension.sendMessage {id, data, type: 'popupContent'}
       @popupPending = false
       @popupDequeue() if @popupQueue.length
