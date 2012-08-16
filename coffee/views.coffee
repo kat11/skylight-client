@@ -92,6 +92,10 @@ class Views.Channels extends Backbone.View
       channels[index].select() if index < channels.length
       false
 
+    Mousetrap.bind 'up up down down left right left right b a', ->
+      socket.send 'konami'
+      false
+
     socket.on 'message:online', (online) => @feedback "#{online} online"
 
     messages =
@@ -303,6 +307,11 @@ class Views.Textbox extends Backbone.View
     field.val ''
 
     return unless str
+
+    # Skyrates does odd things with slash commands and quotes.
+    # This fix probably screws up /ignore even further.
+    if (match = str.match(/^(\/\S+\s+)(".*"?)\s*$/))
+      str = "#{match[1]}\"\"#{match[2]}"
 
     if (match = str.match(/^\/online\s*$/i))
       socket.send 'online'
