@@ -310,8 +310,7 @@ class Views.Textbox extends Backbone.View
 
     # Skyrates does odd things with slash commands and quotes.
     # This fix probably screws up /ignore even further.
-    if (match = str.match(/^(\/\S+\s+)(".*"?)\s*$/))
-      str = "#{match[1]}\"\"#{match[2]}"
+    str = str.replace /^(\/\S+\s+)(".*)/, '$1""$2'
 
     if (match = str.match(/^\/online\s*$/i))
       socket.send 'online'
