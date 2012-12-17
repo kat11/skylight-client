@@ -36,7 +36,7 @@ Handlebars.registerHelper 'chatContent', (content) ->
     char = escapes[char] || char
 
     if fiesta and char != ' '
-      colours = ['f44', '4f4', '66f', 'ff5', 'f5f', '5ff']
+      colours = ['f44', '4f4', '77f', 'ff5', 'f5f', '5ff', 'f80']
       colour  = colours[Math.floor(Math.random() * colours.length)]
       char    = "<span style=\"color:##{colour} !important;\">#{char}</span>"
 
