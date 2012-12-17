@@ -48,9 +48,9 @@ Handlebars.registerHelper 'chatContent', (content) ->
       content = match[1]
 
     tagRegex = /// ^
-      ((?:<(?:i|b|font\s+color[^>]+)>)*) # opening tags
-      (.*?)                              # body
-      ((?:</(?:i|b|font)>)*)             # closing tags
+      ((?:<(?:i|b|u|font\s+color[^>]+)>)*) # opening tags
+      (.*?)                                # body
+      ((?:</(?:i|b|u|font)>)*)             # closing tags
     $ ///
 
     [open, content, close] = content.match(tagRegex)[1..]
