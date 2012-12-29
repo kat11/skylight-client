@@ -9,9 +9,12 @@ Handlebars.registerHelper 'chatContent', (content) ->
   # find and tag urls, do some html escaping, and fiestafy
   treat = (str) ->
     urlRegex = ///
-      (.*?)\b                                                    # pre
-      (https?://[^\s()<>]+(?:\([\w\d]+\)|[^\s!'"(),.:;<=>?[\]])) # url
-      (.*)                                                       # post
+      (.*?)\b                                          # pre
+      (https?://[^\s()]+ (?:
+        \(\w+\) (?:[^\s())]* [^\s!'"(),.:;<=>?[\]])? |
+        [^\s!'"(),.:;<=>?[\]]
+      ))                                               # url
+      (.*)                                             # post
     ///
 
     if (match = str.match urlRegex)
