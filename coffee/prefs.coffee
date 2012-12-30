@@ -37,6 +37,9 @@ class Prefs extends Backbone.Model
     # master switch for whether to show popups
     popups: true
 
+    # recover textbox contents when connection breaks
+    recover: ''
+
     # alert settings
     # popupDuration is in seconds, 0 for sticky popups
 
@@ -104,6 +107,8 @@ class Prefs extends Backbone.Model
   checkActive: (v) -> _.isBoolean v
 
   checkRptag: (v) -> _.isString(v) && v.length <= MAX_RPTAG
+
+  checkRecover: (v) -> _.isString(v) && v.length <= MAX_TEXTBOX
 
   checkTextarea: (v) -> _.isBoolean v
 

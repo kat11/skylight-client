@@ -279,6 +279,16 @@ class Views.Textbox extends Backbone.View
       @render()
     @channels.on 'change', @render, @
 
+    recover = prefs.get 'recover'
+    @textarea.val recover
+    @input.val recover
+    prefs.set 'recover', ''
+    @recover = ['', 0]
+    socket.on 'broken', =>
+      [recover, time] = @recover
+      if Date.now() - time < 15000
+        prefs.set 'recover', recover
+
   render: ->
     placeholder = game.get 'character'
     if @channels.current?.name is 'Roleplay' && prefs.get 'rptag'
@@ -305,6 +315,7 @@ class Views.Textbox extends Backbone.View
 
     str = $.trim field.val()
     field.val ''
+    @recover = [str, Date.now()]
 
     return unless str
 
