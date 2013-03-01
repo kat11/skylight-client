@@ -98,6 +98,10 @@ class Views.Channels extends Backbone.View
 
     socket.on 'message:online', (online) => @feedback "#{online} online"
 
+    socket.on 'message:ignore', (message) =>
+      message += '. <a href="http://skyrates.net/forum/viewtopic.php?t=9994">?</a>'
+      @feedback message
+
     messages =
       rating_success: "rating sent"
       rating_unknown: "unknown rating recipient"
@@ -320,8 +324,7 @@ class Views.Textbox extends Backbone.View
     return unless str
 
     # Skyrates does odd things with slash commands and quotes.
-    # This fix probably screws up /ignore even further.
-    str = str.replace /^(\/\S+\s+)(".*)/, '$1""$2'
+    str = str.replace /^(\/(?!(?:un)?ignore)\S+\s+)(".*)/, '$1""$2'
 
     if (match = str.match(/^\/online\s*$/i))
       socket.send 'online'
@@ -329,11 +332,15 @@ class Views.Textbox extends Backbone.View
       socket.send 'rating', match[2], true
     else if (match = str.match(/^\/(inf|infamy|remy)\s+(\S.*?)\s*$/i))
       socket.send 'rating', match[2], false
+    else if (match = str.match(/^(\/(?:un)?ignore)\s+(\S.*?)\s*$/i))
+      name = match[2]
+      name = "\"#{name}\"" unless name.match /^".*"$/
+      socket.send 'chat', @channels.current.id, "#{match[1]} #{name}"
     else
       channel = @channels.current
       rptag = prefs.get 'rptag'
       if rptag && channel.name is 'Roleplay'
-        str = if (match = str.match(/^\/(ooc|ignore) |^\/\S+$/))
+        str = if (match = str.match(/^\/ooc |^\/\S+$/))
           str
         else if (match = str.match(/^(\/\S+)(.+)/))
           "#{match[1]} #{rptag}#{match[2]}"
@@ -373,7 +380,7 @@ class Views.Feedback extends Backbone.View
   className: 'chat feedback'
 
   render: ->
-    @$el.text @options.string
+    @$el.html @options.string
     @
 
 class Views.Disconnected extends Backbone.View
