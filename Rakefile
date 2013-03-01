@@ -4,7 +4,7 @@
 
 require 'rake/clean'
 
-VERSION = '2012.12.30.0'
+VERSION = '2013.3.1.0'
 
 extension = 'Skylight'
 crx = "#{extension}.crx"
