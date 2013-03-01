@@ -367,6 +367,11 @@ class Views.Chat extends Backbone.View
     else
       'chat'
     @html = Templates["chat/#{template}"] _.extend(@model.toJSON(), {content})
+
+    if @model.get('name') is 'Narbot'
+      @html = @html.
+        replace /\[([^\[\]]+) (<a[^>]+>)[^<]+(<\/a>\]\s)*$/, '[$2$1$3'
+
     alerter.chat @
 
   render: ->
