@@ -3,6 +3,19 @@
 # created to show.
 
 document.addEventListener 'DOMContentLoaded', ->
+  hover = false
+  expired = false
+
+  expire = ->
+    expired = true
+    window.close() unless hover
+
+  document.onmouseover = -> hover = true
+  document.onmouseout = (evt) ->
+    return if evt.toElement
+    hover = false
+    window.close() if expired
+
   # give up and close the popup if it's taking too long to negotiate content.
   abandon = setTimeout (-> window.close()), 1000
 
@@ -19,7 +32,7 @@ document.addEventListener 'DOMContentLoaded', ->
     if data && data.content?
       document.body.className = data.type if data.type
       document.body.innerHTML = data.content
-      setTimeout((-> window.close()), data.duration) if data.duration
+      setTimeout(expire, data.duration) if data.duration
       clearTimeout(abandon)
     else
       window.close()
