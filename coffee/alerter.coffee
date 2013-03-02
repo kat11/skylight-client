@@ -2,6 +2,8 @@
 class Alerter
   constructor: ->
     @popupQueue = []
+    @audioBuffers = {}
+    @audioContext = new (window.webkitAudioContext || window.AudioContext)
 
     game.on 'ready', =>
       game.on 'change:combats', @combats, @
@@ -22,16 +24,29 @@ class Alerter
       @play(alert) if (alert = change.match(/(.+)Sound/)?[1])
 
   play: (type) ->
-    mp3 = prefs.get "#{type}Sound"
     volume = prefs.get('volume') * (prefs.get("#{type}Volume") || 0)
-    if volume > 0.01
-      try
-        url = chrome.extension.getURL "#{mp3}.mp3"
-        audio = new window.Audio url
-        audio.volume = volume
-        audio.play()
-      catch e
-        null
+    return if volume < 0.01
+    audio = prefs.get "#{type}Sound"
+
+    if @audioBuffers[audio]
+      source = @audioContext.createBufferSource()
+      source.buffer = @audioBuffers[audio]
+      gainNode = @audioContext.createGainNode()
+      source.connect gainNode
+      gainNode.connect @audioContext.destination
+      gainNode.gain.value = volume
+      source.noteOn 0
+
+    else unless @audioBuffers[audio] == false
+      @audioBuffers[audio] = false
+      request = new XMLHttpRequest
+      request.open 'GET', chrome.extension.getURL("#{audio}.mp3")
+      request.responseType = 'arraybuffer'
+      request.onload = =>
+        @audioContext.decodeAudioData request.response, (buffer) =>
+          @audioBuffers[audio] = buffer
+          @play type
+      request.send()
 
   popup: (type, content) ->
     return unless prefs.get('popups') && prefs.get("#{type}Popups")
