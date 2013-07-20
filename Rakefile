@@ -4,7 +4,7 @@
 
 require 'rake/clean'
 
-VERSION = '2013.3.1.0'
+VERSION = '2013.7.20.0'
 
 extension = 'Skylight'
 crx = "#{extension}.crx"
@@ -14,7 +14,7 @@ CLEAN << extension
 CLOBBER << crx
 
 # add files to this list if they should be included in the extension package.
-extension_files = FileList['{png,jpg,ttf,html,mp3,js}/*']
+extension_files = FileList['{png,jpg,ttf,mp3,js}/*']
 
 directory extension
 directory 'js'

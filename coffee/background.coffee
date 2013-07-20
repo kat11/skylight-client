@@ -1,44 +1,47 @@
 popups = {}
-
-# New id for a popup negotiation.
-# Eventually recycle ids to prevent interrupted negotiations piling up.
-popupId = do ->
-  MAX_IDS = 10000
-  prev = 0
-  -> prev = (prev + 1) % MAX_IDS
+popupId = 0
 
 chrome.extension.onMessage.addListener (message, sender, respond) ->
   switch message.type
 
     # Content script wants a popup shown.
-    # respond will called with an popup id when one's ready.
-    when 'popupRequest'
-      id = popupId()
-      popups[id] = {requestRespond: respond}
-      webkitNotifications.createHTMLNotification("popup.html?#{id}").show()
+    # respond will be called with an popup id when it's displayed.
+    when 'popup'
+      id = popupId++
+      popup = webkitNotifications.createNotification(
+        chrome.extension.getURL("#{message.img}.png"),
+        message.title,
+        message.body
+      )
+
+      popups[id] = {popup}
+
+      popup.onclose = ->
+        delete popups[id]
+
+      popup.ondisplay = ->
+        popups[id].expire = setTimeout ->
+          popup.cancel()
+        , 1000
+        respond id
+
+      popup.onclick = ->
+        popup.cancel()
+
+      popup.show()
       true # allows delayed response
 
-    # The popup has popped up and is ready for its data.
-    # message.id is the popup id that was sent as query parameter.
-    # respond will be called with a data object.
-    when 'popupReady'
-      {id} = message
-      popups[id].readyRespond = respond
-      popups[id].requestRespond id
-      true # allows delayed response
-
-    # Content script has a data object for the ready popup.
-    when 'popupContent'
-      {id, data} = message
-      popups[id].readyRespond data
-      delete popups[id]
-
-
-
-
-
-
-
-
-
-
+    when 'popupDuration'
+      {id, duration} = message
+      return unless popups[id]
+      {popup, expire} = popups[id]
+      clearTimeout expire
+      switch duration
+        when null
+          popup.cancel()
+        when 0
+          null # stay
+        else
+          setTimeout ->
+            popup.cancel()
+          , duration

@@ -26,6 +26,7 @@ SOUNDS =
   alarm: 'Alarm'
   typewriter: 'Typewriter'
   airraid: 'Air Raid'
+  moo: 'A big cow'
 
 POPUP_DURATIONS = [4, 6, 8, 10] # in seconds
 

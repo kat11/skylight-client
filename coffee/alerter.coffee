@@ -14,6 +14,9 @@ class Alerter
         else
           @queue()
 
+    for name, channel of game.channels
+      channel.on 'add', @chat, @
+
     socket.on 'message:remy', => @rating 'remy'
     socket.on 'message:gilbert', => @rating 'gilbert'
 
@@ -56,35 +59,52 @@ class Alerter
   popupDequeue: ->
     @popupPending = true
     data = @popupQueue.shift()
-    chrome.extension.sendMessage {type: 'popupRequest'}, (id) =>
-      if prefs.get('popups') && prefs.get("#{data.type}Popups")
-        duration = prefs.get("#{data.type}PopupDuration")
-        if duration
-          since = Date.now() - data.time
-          if since > 1000 * 60 * 30
-            data = null
-          else if since > 1000 * 60
-            duration = 1
-        if data
-          data.duration = duration * 1000
-          data.content = data.content()
-      else
-        data = null
+    popup = data.content()
+    if popup
+      popup.img ?= "Icon-48"
+      popup.title ?= game.get('character')
+      popup.type = 'popup'
+      chrome.extension.sendMessage popup, (id) =>
+        duration = null
+        if prefs.get('popups') && prefs.get("#{data.type}Popups")
+          duration = prefs.get("#{data.type}PopupDuration")
+          if duration
+            since = Date.now() - data.time
+            if since > 1000 * 60 * 30
+              duration = null
+            else if since > 1000 * 60 * 2
+              duration = 2000
+            else
+              duration *= 1000
 
-      chrome.extension.sendMessage {id, data, type: 'popupContent'}
+        chrome.extension.sendMessage {id, duration, type: 'popupDuration'}
+        @popupPending = false
+        @popupDequeue() if @popupQueue.length
+    else
       @popupPending = false
       @popupDequeue() if @popupQueue.length
 
-  chat: (view) ->
-    if ! view.model.get('back') &&
-    view.model.get('name') isnt game.get('character') &&
-    prefs.get('channels')[view.model.get('channel')]
+  chat: (model) ->
+    if ! model.get('back') &&
+    model.get('name') isnt game.get('character') &&
+    (model.get('channel') is 'General' || model.get('type') isnt 'announce') &&
+    prefs.get('channels')[model.get('channel')]
       @play 'chat'
       @popup 'chat', ->
-        Handlebars.templates["popup/chat"]
-          channel: view.model.get('channel')
-          faction: view.model.get('faction')
-          content: view.html
+        context = model.toJSON()
+        context.content = context.content.replace /&lt;|&#60;/g, '<'
+        popup = if context.type is 'announce'
+          img: "announce"
+          title: "Announcement"
+          body: Templates['popup/announce'] context
+        else
+          img: "badge#{model.get('faction')}"
+          title: "#{model.get('name')} (#{model.get('channel')})"
+          body: Templates["popup/#{model.get('type')}"] context
+        if context.name is 'Narbot'
+          popup.body = popup.body.
+            replace /\[([^\[\]]+) http:\/\/skyrates\.jusque\S+\]\s*$/, '[$1]'
+        popup
 
   combats: ->
     @combatTime = time = Date.now()
@@ -98,23 +118,26 @@ class Alerter
     @popup 'combat', =>
       return null unless @combatTime == time && game.queue?.first() == leg
       context = _.extend game.toJSON(), leg.toJSON()
-      Handlebars.templates["popup/combat"] context
+      img = "combat"
+      body = Templates["popup/combat"] context
+      {img, body}
 
   disconnect: ->
     @play 'disconnect'
     @popup 'disconnect', ->
-      Handlebars.templates['popup/disconnect'] game.toJSON()
+      body: Templates['popup/disconnect']()
 
   rating: (head) ->
     @play 'rating'
     @popup 'rating', ->
-      Handlebars.templates['popup/rating'] _.extend(game.toJSON(), {head})
+      img: head
+      body: Templates['popup/rating'] {head}
 
   # queue completed
   queue: ->
     @play 'queue'
     @popup 'queue', ->
-      Handlebars.templates['popup/queue'] game.toJSON()
+      body: Templates['popup/queue']()
 
   # started a new queue leg
   leg: ->
@@ -135,4 +158,11 @@ class Alerter
           'buying'
         when 'Sell'
           'selling'
-      Handlebars.templates['popup/leg'] context
+      popup = {}
+      if context.item
+        popup.img = "item#{context.item}"
+        popup.body = Templates['popup/tradeLeg'] context
+      else
+        popup.body = Templates['popup/flightLeg'] context
+      popup
+

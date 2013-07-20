@@ -357,22 +357,12 @@ class Views.Chat extends Backbone.View
     title: Views.timestamp(@model.get('time'), true)
 
   initialize: ->
-    content = @model.get 'content'
-    template = if (match = content.match /^\/em (.*)/)
-      content = match[1]
-      'emote'
-    else if (match = content.match /^\/announce (.*)/)
-      content = match[1]
-      'announce'
-    else
-      'chat'
-    @html = Templates["chat/#{template}"] _.extend(@model.toJSON(), {content})
+    template = @model.get 'type'
+    @html = Templates["chat/#{template}"] @model.toJSON()
 
     if @model.get('name') is 'Narbot'
       @html = @html.
-        replace /\[([^\[\]]+) (<a[^>]+>)[^<]+(<\/a>\]\s)*$/, '[$2$1$3'
-
-    alerter.chat @
+        replace /\[([^\[\]]+) (<a[^>]+>)[^<]+(<\/a>\])\s*$/, '[$2$1$3'
 
   render: ->
     @$el.html @html

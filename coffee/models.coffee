@@ -67,8 +67,19 @@ class Models.Game extends Backbone.Model
     @trigger('ready') if @ready
 
 class Models.Chat extends Backbone.Model
-  initialize: ({time}) -> @set time: new Date(time * 1000)
-  isAnnounce: -> !! @get('content').match /^\/announce /
+  initialize: ({time, content}) ->
+    time = new Date(time * 1000)
+
+    type = if (match = content.match /^\/em (.*)/)
+      content = match[1]
+      'emote'
+    else if (match = content.match /^\/announce (.*)/)
+      content = match[1]
+      'announce'
+    else
+      'chat'
+
+    @set {time, content, type}
 
 class Models.Static extends Backbone.Model
 
@@ -97,7 +108,7 @@ class Collections.Channel extends Backbone.Collection
       chat = new Models.Chat {
         channel: @name, name, title, content, faction, time
       }
-      @push chat if channel == @id || chat.isAnnounce()
+      @push chat if channel == @id || chat.get('type') == 'announce'
 
     socket.on 'message:backchat',
     (channel, name, title, content, faction, time) =>
@@ -197,10 +208,10 @@ class Models.NewsItem extends Backbone.Model
 class Collections.News extends Backbone.Collection
   model: Models.NewsItem
 
-  constructor: (@game, args...) ->
+  constructor: (game, args...) ->
     super args...
 
-    @game.on 'change:squigs', (game, squigs) =>
+    game.on 'change:squigs', (game, squigs) =>
       item =
         type: 'squigs'
         value: squigs

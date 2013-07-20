@@ -3,20 +3,34 @@ Handlebars.registerHelper 'extension', (url..., options) ->
 
 Handlebars.registerHelper 'nonbreaking', (s) -> s.replace /\x20/g, '&nbsp;'
 
-Handlebars.registerHelper 'chatContent', (content) ->
-  fiesta = false
+do ->
+  fiesta = null
+
+  tagRegex = /// ^
+    ((?:<(?:i|b|u|font\s+color[^>]+)>)*) # opening tags
+    (.*?)                                # body
+    ((?:</(?:i|b|u|font)>)*)             # closing tags
+  $ ///
+
+  urlRegex = ///
+    (.*?)\b                                          # pre
+    (https?://[^\s()]+ (?:
+      \(\w+\) (?:[^\s())]* [^\s!'"(),.:;<=>?[\]])? |
+      [^\s!'"(),.:;<=>?[\]]
+    ))                                               # url
+    (.*)                                             # post
+  ///
+
+  escapes =
+    '<': '&lt;'
+    '>': '&gt;'
+    "'": '&#x27;'
+    '"': '&quot;'
+    '/': '&#x2F;'
+    # '&': '&amp;'
 
   # find and tag urls, do some html escaping, and fiestafy
   treat = (str) ->
-    urlRegex = ///
-      (.*?)\b                                          # pre
-      (https?://[^\s()]+ (?:
-        \(\w+\) (?:[^\s())]* [^\s!'"(),.:;<=>?[\]])? |
-        [^\s!'"(),.:;<=>?[\]]
-      ))                                               # url
-      (.*)                                             # post
-    ///
-
     if (match = str.match urlRegex)
       [pre, url, post] = match[1..]
       treatChars(pre) +
@@ -28,14 +42,6 @@ Handlebars.registerHelper 'chatContent', (content) ->
   treatChars = (str) -> (treatChar(char) for char in str.split('')).join('')
 
   treatChar = (char) ->
-    escapes =
-      '<': '&lt;'
-      '>': '&gt;'
-      "'": '&#x27;'
-      '"': '&quot;'
-      '/': '&#x2F;'
-      # '&': '&amp;'
-
     char = escapes[char] || char
 
     if fiesta and char != ' '
@@ -45,22 +51,24 @@ Handlebars.registerHelper 'chatContent', (content) ->
 
     char
 
-  do ->
+  Handlebars.registerHelper 'chatContent', (content) ->
+    fiesta = false
     if (match = content.match /^\/fiesta (.*)/)
       fiesta = true
       content = match[1]
 
-    tagRegex = /// ^
-      ((?:<(?:i|b|u|font\s+color[^>]+)>)*) # opening tags
-      (.*?)                                # body
-      ((?:</(?:i|b|u|font)>)*)             # closing tags
-    $ ///
-
     [open, content, close] = content.match(tagRegex)[1..]
     open + treat(content) + close
 
+  Handlebars.registerHelper 'popupChatContent', (content) ->
+    content = content.replace /^\/fiesta\s+/, ''
+
+    [open, content, close] = content.match(tagRegex)[1..]
+    content
+
 Handlebars.registerHelper 'itemName', (id) -> ITEMS[id]
 Handlebars.registerHelper 'islandName', (id) -> ISLAND_NAMES[id]
+Handlebars.registerHelper 'marketName', (id) -> MARKET[id].toLowerCase()
 
 Handlebars.registerHelper 'gt', (a, b, options) ->
   if a > b then options.fn(@) else options.inverse(@)
@@ -91,4 +99,6 @@ Handlebars.registerHelper 'commaize', (num) ->
   str = ('' + num).split('').reverse().join('')
   str = str.replace /(\d{3}(?!-|$))/g, '$1,'
   str.split('').reverse().join('')
+
+Handlebars.registerHelper 'upcase', (str) -> str.toUpperCase()
 
