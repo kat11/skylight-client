@@ -1,5 +1,12 @@
-popups = {}
-popupId = 0
+timeouts = {}
+
+clear = (id) -> chrome.notifications.clear id, -> null
+
+chrome.notifications.onClosed.addListener (id) ->
+  clearTimeout timeouts[id]
+  delete timeouts[id]
+
+chrome.notifications.onClicked.addListener (id) -> clear id
 
 chrome.extension.onMessage.addListener (message, sender, respond) ->
   switch message.type
@@ -7,41 +14,30 @@ chrome.extension.onMessage.addListener (message, sender, respond) ->
     # Content script wants a popup shown.
     # respond will be called with an popup id when it's displayed.
     when 'popup'
-      id = popupId++
-      popup = webkitNotifications.createNotification(
-        chrome.extension.getURL("#{message.img}.png"),
-        message.title,
-        message.body
-      )
+      opts =
+        type: "basic",
+        title: message.title,
+        message: message.body,
+        iconUrl: "#{message.img}.png"
 
-      popups[id] = {popup}
-
-      popup.onclose = ->
-        delete popups[id]
-
-      popup.ondisplay = ->
-        popups[id].expire = setTimeout ->
-          popup.cancel()
+      chrome.notifications.create "", opts, (id) ->
+        timeouts[id] = setTimeout ->
+          clear id
         , 1000
         respond id
 
-      popup.onclick = ->
-        popup.cancel()
-
-      popup.show()
       true # allows delayed response
 
     when 'popupDuration'
       {id, duration} = message
-      return unless popups[id]
-      {popup, expire} = popups[id]
-      clearTimeout expire
+      return unless id of timeouts
+      clearTimeout timeouts[id]
       switch duration
         when null
-          popup.cancel()
+          clear id
         when 0
           null # stay
         else
-          setTimeout ->
-            popup.cancel()
+          timeouts[id] = setTimeout ->
+            clear id
           , duration
