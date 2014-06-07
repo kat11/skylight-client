@@ -73,6 +73,7 @@ class Views.Channels extends Backbone.View
   initialize: ->
     index = 0
     channels = []
+    @channelsByName = {}
     for name of CHANNELS
       if (collection = game.channels[name])
         do =>
@@ -81,6 +82,7 @@ class Views.Channels extends Backbone.View
           channel.on 'selected', => @show channel
           channel.select() unless @current
           channels.push channel
+          @channelsByName[name] = channel
 
     Mousetrap.bind 'alt+ctrl+left', =>
       index = @current.index - 1
@@ -137,6 +139,13 @@ class Views.Channels extends Backbone.View
     , 0
 
     @trigger 'change'
+
+  showByName: (name) ->
+    if name of @channelsByName
+      @channelsByName[name].select()
+      true
+    else
+      false
 
   feedback: (string) ->
     @current?.feedback string
@@ -328,6 +337,13 @@ class Views.Textbox extends Backbone.View
 
     if (match = str.match(/^\/online\s*$/i))
       socket.send 'online'
+    else if (match = str.match(/^\/channel\s*$/i))
+      @channels.current.feedback @channels.current.name
+    else if (match = str.match(/^\/channel\s+(\S.*?)\s*$/i))
+      channel = match[1].toLowerCase()
+      channel = channel.replace /./, (c) -> c.toUpperCase()
+      unless @channels.showByName channel
+        @channels.current.feedback 'Invalid channel'
     else if (match = str.match(/^\/(hon|honou?r|gil|gilbert)\s+(\S.*?)\s*$/i))
       socket.send 'rating', match[2], true
     else if (match = str.match(/^\/(inf|infamy|remy)\s+(\S.*?)\s*$/i))
