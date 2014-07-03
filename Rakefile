@@ -1,17 +1,17 @@
-# Build script for Skylight chrome extension. Default task prepares a directory
-# to be built into an extension .crx package, or loaded unpacked through
-# Chrome's extensions manager at chrome://extensions
+# Build script for Skylight chrome extension. Default task prepares an extension
+# directory for use with Chrome's extensions manager at chrome://extensions and
+# also zips that directory ready for uploading to the web store.
 
 require 'rake/clean'
 
-VERSION = '2014.6.8.0'
+VERSION = '2014.7.4.0'
 
 extension = 'Skylight'
-crx = "#{extension}.crx"
-task :default => crx
+zip = "#{extension}.zip"
+task :default => zip
 
 CLEAN << extension
-CLOBBER << crx
+CLOBBER << zip
 
 # add files to this list if they should be included in the extension package.
 extension_files = FileList['{png,jpg,ttf,mp3,js}/*']
@@ -80,7 +80,6 @@ file manifest => [__FILE__, manifest.pathmap('%d')] do
     name: extension,
     description: "A less flashy Skyrates.",
     version: VERSION,
-    update_url: "http://skyrates.jusque.net/skylight/chromeupdate.xml",
     minimum_chrome_version: "21",
     icons: {
       "48"  => "Icon-48.png",
@@ -115,17 +114,11 @@ extension_files.uniq.each do |src|
   file dest => [src, dest.pathmap('%d')] do
     copy src, dest
   end
-  file crx => dest
+  file zip => dest
 end
 
 
 desc "Compile and marshall files for building the extension package."
-file crx do
-  puts <<-END
-
-***
-*** Build #{crx} from #{extension} directory in Chrome's Extensions manager.
-***
-  END
-  exit
+file zip do
+  sh "zip -r #{extension} #{extension}"
 end

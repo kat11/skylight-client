@@ -376,10 +376,6 @@ class Views.Chat extends Backbone.View
     template = @model.get 'type'
     @html = Templates["chat/#{template}"] @model.toJSON()
 
-    if @model.get('name') is 'Narbot'
-      @html = @html.
-        replace /\[([^\[\]]+) (<a[^>]+>)[^<]+(<\/a>\])\s*$/, '[$2$1$3'
-
   render: ->
     @$el.html @html
     @

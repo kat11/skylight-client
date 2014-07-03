@@ -79,7 +79,9 @@ class Models.Chat extends Backbone.Model
     else
       'chat'
 
-    @set {time, content, type}
+    unsanitary = !! content.match /<(?!\/?(i|b|u|font( color=['"][\w#]+['"])?|a( href="\/\/[^\s">]+" target="_blank")?)>)/
+
+    @set {time, content, type, unsanitary}
 
 class Models.Static extends Backbone.Model
 
@@ -108,14 +110,17 @@ class Collections.Channel extends Backbone.Collection
       chat = new Models.Chat {
         channel: @name, name, title, content, faction, time
       }
-      @push chat if channel == @id || chat.get('type') == 'announce'
+
+      if channel == @id || chat.get('type') == 'announce'
+        @push chat unless chat.get('unsanitary')
 
     socket.on 'message:backchat',
     (channel, name, title, content, faction, time) =>
       return unless channel == @id
-      @unshift new Models.Chat {
+      chat = new Models.Chat {
         channel: @name, name, title, content, faction, time, back: true
       }
+      @unshift chat unless chat.get('unsanitary')
 
   getMore: ->
     return unless @more

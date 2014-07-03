@@ -5,14 +5,9 @@ Handlebars.registerHelper 'nonbreaking', (s) -> s.replace /\x20/g, '&nbsp;'
 
 do ->
   fiesta = null
+  styled = null
 
-  tagRegex = /// ^
-    ((?:<(?:i|b|u|font\s+color[^>]+)>)*) # opening tags
-    (.*?)                                # body
-    ((?:</(?:i|b|u|font)>)*)             # closing tags
-  $ ///
-
-  urlRegex = ///
+  URL_REGEX = ///
     (.*?)\b                                          # pre
     (https?://[^\s()]+ (?:
       \(\w+\) (?:[^\s())]* [^\s!'"(),.:;<=>?[\]])? |
@@ -21,35 +16,78 @@ do ->
     (.*)                                             # post
   ///
 
-  escapes =
-    '<': '&lt;'
-    '>': '&gt;'
-    "'": '&#x27;'
-    '"': '&quot;'
-    '/': '&#x2F;'
-    # '&': '&amp;'
+  FIESTA_COLOURS = ['f44', '4f4', '77f', 'ff5', 'f5f', '5ff', 'f80']
 
-  # find and tag urls, do some html escaping, and fiestafy
-  treat = (str) ->
-    if (match = str.match urlRegex)
-      [pre, url, post] = match[1..]
-      treatChars(pre) +
-      "<a href=\"#{url}\" target=\"_blank\">#{treatChars(url)}</a>" +
-      treat(post)
+  REPLACEMAYANTS = [
+    [/([^-])--(?!-)/g, '$1—']
+    [ /a`/g, 'á' ]
+    [ /`a/g, 'à' ]
+    [ /e`/g, 'é' ]
+    [ /`e/g, 'è' ]
+    [ /i`/g, 'í' ]
+    [ /`i/g, 'ì' ]
+    [ /o`/g, 'ó' ]
+    [ /`o/g, 'ò' ]
+    [ /u`/g, 'ú' ]
+    [ /`u/g, 'ù' ]
+    [ /<(3+)/g, (_,s) -> ('♥' for _ in s).join('') ]
+  ]
+
+  treatFiesta = (text) ->
+    if fiesta
+      text.replace /&[\w#]{1,10};|./g, (e) ->
+        colour = Math.floor(Math.random() * FIESTA_COLOURS.length)
+        colour = FIESTA_COLOURS[colour]
+        "<span style=\"color:##{colour} !important;\">#{_.escape e}</span>"
     else
-      treatChars str
+      _.escape text
 
-  treatChars = (str) -> (treatChar(char) for char in str.split('')).join('')
+  treatReplace = (text) ->
+    for [from, to] in REPLACEMAYANTS
+      text = text.replace from, to
 
-  treatChar = (char) ->
-    char = escapes[char] || char
+    treatFiesta text
 
-    if fiesta and char != ' '
-      colours = ['f44', '4f4', '77f', 'ff5', 'f5f', '5ff', 'f80']
-      colour  = colours[Math.floor(Math.random() * colours.length)]
-      char    = "<span style=\"color:##{colour} !important;\">#{char}</span>"
+  treatLinks = (text) ->
+    if (match = text.match URL_REGEX)
+      [pre, url, post] = match[1..]
+      treatReplace(pre) +
+        "<a href=\"#{encodeURI url}\" target=\"_blank\">" +
+        treatFiesta(url) +
+        "</a>" +
+        treatLinks(post)
+    else
+      treatReplace text
 
-    char
+  treatItalic = (text) ->
+    if (match = text.match /(.*?)\*(?=\S)([^*]*[^\s*])\*(.*)/)
+      [pre, italic, post] = match[1..]
+      treatLinks(pre) + "<i>#{treatLinks italic}</i>" + treatItalic(post)
+    else
+      treatLinks text
+
+  treatBold = (text) ->
+    if (match = text.match /(.*?)\*\*(?=\S)([^*]*[^\s*])\*\*(.*)/)
+      [pre, bold, post] = match[1..]
+      treatItalic(pre) + "<b>#{treatLinks bold}</b>" + treatBold(post)
+    else
+      treatItalic text
+
+  # unless content =~ /^\/(b|i|ooc) /
+  #   content.gsub! /(\*\*) (?=\S) ([^*]+) (?<=\S) \1/x, '<b>\2</b>'
+  #   content.gsub! /(\*) (?=\S) (.+?) (?<=\S) \1/x, '<i>\2</i>'
+  # end
+
+  treat = (nodes) ->
+    nodes = for node in nodes
+      $node = $ node
+      if node instanceof Text
+        text = $node.text()
+        if styled then treatLinks(text) else treatBold(text)
+      else
+        $node.html treat $node.contents()
+        node.outerHTML
+    nodes.join ''
 
   Handlebars.registerHelper 'chatContent', (content) ->
     fiesta = false
@@ -57,14 +95,15 @@ do ->
       fiesta = true
       content = match[1]
 
-    [open, content, close] = content.match(tagRegex)[1..]
-    open + treat(content) + close
+    styled = !! content.match /<(i|b)>/
 
-  Handlebars.registerHelper 'popupChatContent', (content) ->
-    content = content.replace /^\/fiesta\s+/, ''
+    content = content.replace /&(?!(lt|#60);)/g, '&amp;'
 
-    [open, content, close] = content.match(tagRegex)[1..]
-    content
+    treat $.parseHTML content
+
+Handlebars.registerHelper 'popupChatContent', (content) ->
+  content = content.replace /^\/fiesta\s+/, ''
+  $('<div/>').html(content).text()
 
 Handlebars.registerHelper 'itemName', (id) -> ITEMS[id]
 Handlebars.registerHelper 'islandName', (id) -> ISLAND_NAMES[id]
