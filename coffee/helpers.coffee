@@ -35,7 +35,7 @@ do ->
 
   treatFiesta = (text) ->
     if fiesta
-      text.replace /&[\w#]{1,10};|./g, (e) ->
+      text.replace /./g, (e) ->
         colour = Math.floor(Math.random() * FIESTA_COLOURS.length)
         colour = FIESTA_COLOURS[colour]
         "<span style=\"color:##{colour} !important;\">#{_.escape e}</span>"
@@ -73,11 +73,6 @@ do ->
     else
       treatItalic text
 
-  # unless content =~ /^\/(b|i|ooc) /
-  #   content.gsub! /(\*\*) (?=\S) ([^*]+) (?<=\S) \1/x, '<b>\2</b>'
-  #   content.gsub! /(\*) (?=\S) (.+?) (?<=\S) \1/x, '<i>\2</i>'
-  # end
-
   treat = (nodes) ->
     nodes = for node in nodes
       $node = $ node
@@ -102,6 +97,7 @@ do ->
     treat $.parseHTML content
 
 Handlebars.registerHelper 'popupChatContent', (content) ->
+  content = content.replace /&(?!(lt|#60);)/g, '&amp;'
   content = content.replace /^\/fiesta\s+/, ''
   $('<div/>').html(content).text()
 

@@ -4,7 +4,7 @@
 
 require 'rake/clean'
 
-VERSION = '2014.7.4.0'
+VERSION = '2014.8.3.0'
 
 extension = 'Skylight'
 zip = "#{extension}.zip"
@@ -80,7 +80,7 @@ file manifest => [__FILE__, manifest.pathmap('%d')] do
     name: extension,
     description: "A less flashy Skyrates.",
     version: VERSION,
-    minimum_chrome_version: "21",
+    minimum_chrome_version: "35",
     icons: {
       "48"  => "Icon-48.png",
       "128" => "Icon-128.png"

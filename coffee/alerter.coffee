@@ -3,7 +3,7 @@ class Alerter
   constructor: ->
     @popupQueue = []
     @audioBuffers = {}
-    @audioContext = new (window.webkitAudioContext || window.AudioContext)
+    @audioContext = new window.AudioContext
 
     game.on 'ready', =>
       game.on 'change:combats', @combats, @
@@ -34,11 +34,11 @@ class Alerter
     if @audioBuffers[audio]
       source = @audioContext.createBufferSource()
       source.buffer = @audioBuffers[audio]
-      gainNode = @audioContext.createGainNode()
+      gainNode = @audioContext.createGain()
       source.connect gainNode
       gainNode.connect @audioContext.destination
       gainNode.gain.value = volume
-      source.noteOn 0
+      source.start 0
 
     else unless @audioBuffers[audio] == false
       @audioBuffers[audio] = false
